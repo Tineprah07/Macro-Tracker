@@ -1355,9 +1355,18 @@
       const kcalOver = Math.max(0, Math.round(totals.calories - targets.calories.max));
 
       if (anyOver) {
-        statusBar.className = 'status-bar over';
         const overItems = MACROS.filter(m => totals[m] > targets[m].max);
-        statusText.textContent = `Over target: ${overItems.join(', ')}${kcalOver ? ` (+${kcalOver} kcal)` : ''}`;
+        const nonProteinOverItems = overItems.filter(m => m !== 'protein');
+        const proteinOver = overItems.includes('protein');
+
+        if (nonProteinOverItems.length > 0) {
+          statusBar.className = 'status-bar over';
+          statusText.textContent = `Over target: ${nonProteinOverItems.join(', ')}${kcalOver ? ` (+${kcalOver} kcal)` : ''}`;
+        } else if (proteinOver) {
+          statusBar.className = 'status-bar on-track';
+          const proteinExtra = Math.max(0, Math.round(totals.protein - targets.protein.max));
+          statusText.textContent = `Protein is above goal by ${proteinExtra}g — usually fine if calories stay on plan`;
+        }
       } else if (allInRange) {
         statusBar.className = 'status-bar on-track';
         statusText.textContent = `All macros within target range ✓ (${kcalRemaining} kcal left)`;
