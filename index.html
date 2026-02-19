@@ -347,6 +347,57 @@
     animation: pulse 2s infinite;
   }
 
+  .remaining-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .remaining-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 86px;
+  }
+
+  .remaining-item .label {
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    line-height: 1.2;
+    min-height: 2.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .remaining-item .value {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    line-height: 1.2;
+    min-height: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .remaining-item.protein .value { color: var(--protein); }
+  .remaining-item.carbs .value { color: var(--carbs); }
+  .remaining-item.fats .value { color: var(--fats); }
+  .remaining-item.calories .value { color: var(--calories); }
+  .remaining-item .value.over { color: var(--danger); }
+
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
@@ -839,6 +890,25 @@
   <div class="status-bar empty" id="statusBar">
     <div class="status-dot"></div>
     <span id="statusText">No entries yet — start logging</span>
+  </div>
+
+  <div class="remaining-grid">
+    <div class="remaining-item protein">
+      <div class="label">Protein Left</div>
+      <div class="value" id="leftProtein">160g left</div>
+    </div>
+    <div class="remaining-item carbs">
+      <div class="label">Carbs Left</div>
+      <div class="value" id="leftCarbs">225g left</div>
+    </div>
+    <div class="remaining-item fats">
+      <div class="label">Fats Left</div>
+      <div class="value" id="leftFats">68g left</div>
+    </div>
+    <div class="remaining-item calories">
+      <div class="label">Calories Left</div>
+      <div class="value" id="leftCalories">2200 left</div>
+    </div>
   </div>
 
   <!-- Target Breakdown -->
@@ -1337,6 +1407,19 @@
       const barVal = document.getElementById(`barVal${macro.charAt(0).toUpperCase() + macro.slice(1)}`);
       barVal.textContent = Math.round(val);
       barVal.classList.toggle('over', isOver);
+    });
+
+    // Remaining by macro
+    MACROS.forEach(macro => {
+      const remainingEl = document.getElementById(`left${macro.charAt(0).toUpperCase() + macro.slice(1)}`);
+      const remaining = Math.round(targets[macro].max - totals[macro]);
+      const unit = macro === 'calories' ? '' : 'g';
+      const isOver = remaining < 0;
+      const display = isOver
+        ? `${Math.abs(remaining)}${unit} over`
+        : `${remaining}${unit} left`;
+      remainingEl.textContent = display;
+      remainingEl.classList.toggle('over', isOver);
     });
 
     // Status
